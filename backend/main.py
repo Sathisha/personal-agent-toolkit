@@ -4,7 +4,7 @@ import shutil
 import base64
 import traceback
 import httpx
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -256,12 +256,17 @@ async def clear_rag():
 async def list_models(
     api_type: str = "lmstudio",
     api_url: str = "http://host.docker.internal:51234",
-    api_key: str = ""
+    x_llm_api_key: str = Header(default="", alias="X-LLM-Api-Key")
 ):
-    """Retrieve loaded model names from the configured LLM endpoint."""
+    """Retrieve loaded model names from the configured LLM endpoint.
+
+    The API key is read from a request header rather than a query
+    parameter — query strings end up in access logs (and browser/proxy
+    history) in plaintext, headers don't.
+    """
     headers = {}
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
+    if x_llm_api_key:
+        headers["Authorization"] = f"Bearer {x_llm_api_key}"
 
     candidates = ["/v1/models", "/models", "/api/models"]
     async with httpx.AsyncClient(timeout=httpx.Timeout(connect=5.0, read=15.0, write=10.0, pool=5.0)) as client:

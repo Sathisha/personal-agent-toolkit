@@ -270,10 +270,13 @@ export default function App() {
       const backendHost = window.location.hostname;
       const query = new URLSearchParams({
         api_type: config.api_type,
-        api_url: config.api_url,
-        api_key: config.api_key || ''
+        api_url: config.api_url
       });
-      const res = await fetch(`http://${backendHost}:8005/api/models?${query.toString()}`);
+      // Sent as a header, not a query param — query strings end up in
+      // plaintext access logs, headers don't.
+      const res = await fetch(`http://${backendHost}:8005/api/models?${query.toString()}`, {
+        headers: config.api_key ? { 'X-LLM-Api-Key': config.api_key } : {}
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.detail || data.error || 'Failed to fetch models');
