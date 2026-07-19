@@ -21,6 +21,11 @@ def _parse_data_uri(uri: str) -> Optional[Dict[str, str]]:
 # real-time access" refusal even when a working search_web tool is available and the
 # system prompt tells them to use it. These phrases catch that specific pattern so we
 # can force one corrective retry instead of just accepting the guess as final.
+#
+# This also has to catch the quieter failure mode: instead of refusing outright, the
+# model just answers confidently from stale training knowledge and hedges with a
+# knowledge-cutoff disclaimer (e.g. "does the latest version of X support Y" answered
+# from memory). That's just as much a case for an actual search as an explicit refusal.
 _CAPABILITY_REFUSAL_PHRASES = [
     "i do not have access to real-time",
     "i don't have access to real-time",
@@ -42,6 +47,20 @@ _CAPABILITY_REFUSAL_PHRASES = [
     "i'm unable to access the internet",
     "i do not have internet access",
     "i don't have internet access",
+    "as of my last update",
+    "as of my last training",
+    "as of my knowledge cutoff",
+    "as of my training cutoff",
+    "based on my training data",
+    "my training data only goes up",
+    "i don't have the most recent",
+    "i do not have the most recent",
+    "i don't have up-to-date information",
+    "i do not have up-to-date information",
+    "may have changed since",
+    "might have changed since",
+    "i'm not certain of the latest",
+    "i am not certain of the latest",
 ]
 
 
