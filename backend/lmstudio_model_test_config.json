@@ -1,0 +1,11 @@
+{
+  "endpoint": "http://127.0.0.1:51234",
+  "control_endpoint": "http://127.0.0.1:51234",
+  "api_key": "sk-lm-iWTvTIb3:fyT4Olr0xQ62LYGcHS6M",
+  "models": [
+    "google/gemma-4-12b",
+    "google/gemma-4-12b-qat",
+    "http://127.0.0.1:51234"
+  ],
+  "output_dir": ".backend/results"
+}

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Frontend build output
+frontend/dist/
+frontend/build/
+
+# Generated benchmark results (machine-specific, not source)
+backend/results/
+
+# Agent's runtime sandbox — recreated automatically on startup
+workspace_files/
+
+# SearXNG runtime/cache files — keep only our settings.yml
+searxng/*
+!searxng/settings.yml
+
+# Env files
+.env
+.env.local
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+
+# Personal Claude Code settings (not shared)
+.claude/settings.local.json

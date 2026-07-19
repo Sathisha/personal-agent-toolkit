@@ -1,0 +1,41 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - INSTANCE_NAME=local-agent-search
+    # Intentionally not published to the host — only reachable from other
+    # containers on this compose network, at http://searxng:8080.
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./backend:/app
+      - ./workspace_files:/workspace_files
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - WORKSPACE_DIR=/workspace_files
+      - SEARXNG_URL=http://searxng:8080
+    depends_on:
+      - searxng
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - WDS_SOCKET_PORT=0

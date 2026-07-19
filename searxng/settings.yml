@@ -1,0 +1,17 @@
+use_default_settings: true
+
+server:
+  secret_key: "161bee712ccd730acd362e709c25880d3e160f15c6dd545d5cad105dc1f4bc36"
+  limiter: false
+
+search:
+  formats:
+    - html
+    - json
+
+# Brave aggressively rate-limits/blocks fresh self-hosted SearXNG instances
+# (repeated SearxEngineTooManyRequestsException in logs) — disable it rather
+# than let it flap and log noise on every query. Other engines still work.
+engines:
+  - name: brave
+    disabled: true
