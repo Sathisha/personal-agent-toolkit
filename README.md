@@ -46,7 +46,37 @@ The same applies separately to the embedding backend used for RAG.
 - **Stop button** — cancel a response mid-stream.
 - **Reasoning visibility** — `<think>...</think>` traces from reasoning models are shown in a collapsible "thinking" panel, separate from the final answer.
 
-## Quick start (Docker Compose)
+## Getting started
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose (bundled with Docker Desktop on Mac/Windows)
+- A local model server already installed — [LM Studio](https://lmstudio.ai/) or [Ollama](https://ollama.com/) — **or** an API key for a cloud OpenAI-compatible endpoint
+- Ports `3005` and `8005` free on your machine (SearXNG runs internal-only and doesn't need a free host port)
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/Sathisha/personal-agent-toolkit.git
+cd personal-agent-toolkit
+```
+
+### 2. Start your model server
+
+Pick whichever you have — no code changes needed, it's all configured later in the UI.
+
+**LM Studio:**
+1. Load a model in LM Studio.
+2. Go to the **Developer** tab and start the local server (default port `1234`).
+3. If you've turned on "Require API Key" in LM Studio's server settings, note the token down — you'll paste it into the app's Settings panel.
+
+**Ollama:**
+1. Make sure the Ollama service is running (`ollama serve`, or it's already running as a background service).
+2. Pull a model if you haven't: `ollama pull llama3.1` (or any model you prefer).
+
+**Cloud endpoint:** just have your API key and base URL ready — no local server needed.
+
+### 3. Build and start the containers
 
 ```bash
 docker-compose build
@@ -59,9 +89,40 @@ This brings up three containers:
 - **frontend** — the chat UI, exposed on `localhost:3005`
 - **searxng** — self-hosted search backend, internal-only (not exposed to the host)
 
-Open `http://localhost:3005`, go to **Settings**, point the API connection at your running LM Studio/Ollama instance (or a cloud endpoint) and pick a model.
+Leave this running in its terminal (or add `-d` to run detached: `docker-compose up -d`).
 
-> **Note:** local backends (LM Studio/Ollama) running on your host machine are reached from inside the backend container via `host.docker.internal` — this is pre-wired in `docker-compose.yml`.
+### 4. Open the app and configure it
+
+1. Open `http://localhost:3005` in your browser.
+2. Click the gear icon (**Settings**) in the left nav.
+3. Fill in the connection fields:
+
+   | Field | What to put |
+   |---|---|
+   | API Connection Type | `LM Studio (Local)`, `Ollama (Local)`, or `OpenAI Endpoint` |
+   | Endpoint URL | LM Studio: `http://host.docker.internal:1234` · Ollama: `http://host.docker.internal:11434` · Cloud: the provider's base URL |
+   | Model Name | Click **Refresh** to pull the list of currently loaded/available models, or type one manually |
+   | API Key | Only needed if your server requires one (LM Studio's optional token, Ollama usually none, cloud providers always) |
+
+   > **Why `host.docker.internal` and not `localhost`?** The backend runs inside a container, so `localhost` from its point of view is the container itself, not your machine. `host.docker.internal` is a special DNS name Docker provides that resolves back to your host machine — it's already wired into `docker-compose.yml` via `extra_hosts`, so you just need to use it in the URL.
+
+4. Click **Save and Close**.
+
+### 5. Try it out
+
+- Send a normal message and confirm you get a streamed response.
+- Ask something time-sensitive (e.g. "what's today's top tech news?") to confirm the web search tool kicks in — you should see distinct "Search #1", "Search #2..." steps in the response.
+- Open the **RAG Library** tab and upload a PDF/TXT/MD file, then ask a question about its contents.
+- Open the **MCP Servers** tab if you want to connect an external MCP server (Postgres, GitHub, Memory, etc.).
+- Try pasting a screenshot directly into the chat box, or attaching an image, if your model supports vision.
+
+### Troubleshooting
+
+- **"Cannot reach LLM endpoint"** — confirm your model server is actually running and its local server/API mode is started (LM Studio's server doesn't start just by loading a model — you have to start it explicitly on the Developer tab). Also double-check you used `host.docker.internal`, not `localhost`, in the Endpoint URL.
+- **401 / API key errors** — your model server has a token requirement turned on; paste the matching key into the Settings panel's API Key field.
+- **Search results seem thin or a "Too many requests" warning shows up in `docker-compose logs searxng`** — one of SearXNG's upstream search engines is rate-limiting a fresh self-hosted instance; this is normal and SearXNG automatically falls back to its other engines. See `searxng/settings.yml` if you want to disable a specific noisy engine.
+- **No internet / search unavailable** — the agent detects this and tells you directly in the chat rather than hanging or endlessly retrying.
+- **Rebuilding after pulling changes** — run `docker-compose build` again before `docker-compose up` to pick up dependency or Dockerfile changes; UI/backend source changes alone hot-reload automatically while the containers are running.
 
 ## Configuration
 
