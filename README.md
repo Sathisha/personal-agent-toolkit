@@ -1,29 +1,33 @@
 # Personal Agent Toolkit
 
-Personal Agent Toolkit is the repo behind **Personal Agent** — a self-hosted, batteries-included chat UI and agent runtime that sits in front of **any OpenAI-compatible model API** — local (LM Studio, Ollama) or cloud (OpenAI-compatible endpoints). Point it at a model and you get an agentic tool-calling loop, live web search, document RAG, MCP server extensibility, image upload/paste, and voice I/O — none of which the default chat UI in LM Studio or Ollama gives you.
+Personal Agent Toolkit is the repo behind **Personal Agent** — a self-hosted, batteries-included chat UI and agent runtime that sits in front of **any OpenAI-compatible model API** — local (LM Studio, Ollama) or cloud (OpenAI-compatible endpoints). Point it at a model and you get an agentic tool-calling loop, live self-hosted web search, document RAG, MCP server extensibility, image upload/paste, and voice I/O — wired into one chat interface, working the same way regardless of which model or backend is behind it.
 
 It runs entirely on your own machine via Docker Compose: your prompts, documents, and search queries never have to leave your network unless you choose to point it at a cloud model.
 
 ## Why not just use LM Studio's or Ollama's built-in chat?
 
-LM Studio and Ollama are excellent at *serving* models, but their built-in chat windows are single-turn conversations with no ability to act. Personal Agent wraps the same models (or a cloud model, interchangeably) in an actual agent:
+To be precise about this rather than oversimplify it: both LM Studio (since v0.3.6) and Ollama (since v0.3.0) already expose tool-calling at the **API level** — that's the underlying protocol this project (and agent tooling in general) is built on, not something either one lacks. Ollama has also recently added a hosted web search API and experimental image generation.
 
-| | LM Studio / Ollama chat | Personal Agent |
-|---|---|---|
-| Talk to a local model | ✅ | ✅ |
-| Talk to a cloud/OpenAI-compatible model | ❌ (separate tool) | ✅ — same UI, just change the endpoint |
-| Tool-calling / agentic loop (read/write files, run shell commands, execute Python) | ❌ | ✅ |
-| Live web search, with automatic query refinement until it finds a good answer | ❌ | ✅ (self-hosted, no API key) |
-| RAG over your own documents (PDF/TXT/MD/code) | ❌ | ✅ |
-| MCP server support (Postgres, GitHub, Memory, or any custom MCP server) | ❌ | ✅ |
-| Image upload / clipboard screenshot paste for vision models | Partial | ✅ |
-| Voice input (speech-to-text) and spoken responses (text-to-speech) | ❌ | ✅ |
-| Visible "thinking" trace for reasoning models (e.g. DeepSeek R1 style) | ❌ | ✅ |
-| Markdown + LaTeX math rendering in responses | ❌ | ✅ |
-| Stop/cancel an in-flight response | Varies | ✅ |
-| Graceful offline handling (won't hang or spam retries with no internet) | N/A | ✅ |
+What neither one does is wire those capabilities into their *own bundled chat window* as something you can actually use — there's no file/shell/Python tool loop, no document search, no MCP servers, no voice, in the box:
 
-In short: LM Studio/Ollama answer "what does the model say?" — Personal Agent answers "what can the model *do*, using this model or that one, local or cloud, interchangeably?"
+| | LM Studio (default chat) | Ollama (default chat/CLI) | Personal Agent Toolkit |
+|---|---|---|---|
+| Talk to a local model | ✅ | ✅ | ✅ |
+| Talk to a cloud/OpenAI-compatible model | ❌ (separate tool) | ❌ (separate tool) | ✅ — same UI, just change the endpoint |
+| Tool-calling supported at the API level | ✅ (v0.3.6+) | ✅ (v0.3.0+) | ✅ (built on top of this) |
+| That tool-calling wired into a usable agent (file r/w, shell commands, Python) in the chat itself | ❌ | ❌ | ✅ |
+| Live web search | ❌ | ⚠️ hosted API, requires a free ollama.com account + API key | ✅ self-hosted (SearXNG), no account or API key |
+| Image generation | ❌ | ⚠️ experimental, macOS-only as of early 2026, no LoRA/ControlNet/img2img yet | Not a focus of this project yet |
+| RAG over your own documents (PDF/TXT/MD/code) | ❌ | ❌ | ✅ |
+| MCP server support (Postgres, GitHub, Memory, or any custom MCP server) | ❌ | ❌ | ✅ |
+| Image upload / clipboard screenshot paste for vision models | Partial | Partial | ✅ |
+| Voice input (speech-to-text) and spoken responses (text-to-speech) | ❌ | ❌ | ✅ |
+| Visible "thinking" trace for reasoning models (e.g. DeepSeek R1 style) | ❌ | ❌ | ✅ |
+| Markdown + LaTeX math rendering in responses | ❌ | ❌ | ✅ |
+| Stop/cancel an in-flight response | Varies | Varies | ✅ |
+| Graceful offline handling (won't hang or spam retries with no internet) | N/A | N/A | ✅ |
+
+In short: LM Studio's and Ollama's own chat windows still answer "what does the model say?" — even as the platforms underneath them grow more capable — while Personal Agent Toolkit turns that into "what can the model *do*, using this model or that one, local or cloud, interchangeably?"
 
 ## Supported model backends
 
