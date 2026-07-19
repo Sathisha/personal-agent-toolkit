@@ -1,6 +1,8 @@
 # Personal Agent Toolkit
 
-Personal Agent Toolkit is the repo behind **Personal Agent** — a self-hosted, batteries-included chat UI and agent runtime that sits in front of **any OpenAI-compatible model API** — local (LM Studio, Ollama) or cloud (OpenAI-compatible endpoints). Point it at a model and you get an agentic tool-calling loop, live self-hosted web search, document RAG, MCP server extensibility, image upload/paste, and voice I/O — wired into one chat interface, working the same way regardless of which model or backend is behind it.
+Personal Agent Toolkit is the repo behind **Personal Agent** — a small, self-hosted chat UI and agent runtime that sits in front of **any OpenAI-compatible model API** — local (LM Studio, Ollama) or cloud (OpenAI-compatible endpoints). Point it at a model and you get an agentic tool-calling loop, live self-hosted web search, document RAG, MCP server extensibility, image upload/paste, and voice I/O.
+
+It's lightweight, personal, and easily customizable — a small, plain Python + React codebase with no plugin system or config DSL to learn, so you can open the tool loop, the search backend, or the UI and just change it. See [Customize it](#customize-it) below.
 
 It runs entirely on your own machine via Docker Compose: your prompts, documents, and search queries never have to leave your network unless you choose to point it at a cloud model.
 
@@ -27,7 +29,7 @@ What neither one does is wire those capabilities into their *own bundled chat wi
 | Stop/cancel an in-flight response | Varies | Varies | ✅ |
 | Graceful offline handling (won't hang or spam retries with no internet) | N/A | N/A | ✅ |
 
-In short: LM Studio's and Ollama's own chat windows still answer "what does the model say?" — even as the platforms underneath them grow more capable — while Personal Agent Toolkit turns that into "what can the model *do*, using this model or that one, local or cloud, interchangeably?"
+In short: LM Studio's and Ollama's own chat windows still answer "what does the model say?" — even as the platforms underneath them grow more capable — while this project turns that into "what can the model *do*?"
 
 ## Supported model backends
 
@@ -131,6 +133,18 @@ Leave this running in its terminal (or add `-d` to run detached: `docker-compose
 ## Configuration
 
 All runtime configuration (endpoint, model, API key, system prompt, embedding settings) lives in the Settings panel and is saved to your browser's `localStorage` — no `.env` editing required for normal use. Backend-only settings (workspace directory, SearXNG URL) are set via environment variables in `docker-compose.yml`.
+
+## Customize it
+
+This is the actual point of the project — everything here is intentionally simple to change:
+
+- **Add or change a tool** — edit `TOOL_DEFINITIONS` and `execute_tool` in `backend/agent/tools.py`.
+- **Change how the agent loop behaves** (iteration limits, the search-retry/circuit-breaker logic, streaming and thinking-tag parsing) — it's all in `backend/agent/runner.py`.
+- **Swap the search backend** — `search_web` in `tools.py` calls a self-hosted SearXNG instance today; point it at anything else you'd rather use.
+- **Change the UI** — it's a single-file React app at `frontend/src/App.tsx`, styled in `frontend/src/styles/App.css`. No component library or design system to learn first.
+- **Add a new API route** — `backend/main.py` is a small FastAPI app; add an endpoint the same way as any of the existing ones.
+
+No build step, no plugin manifest, no restarting the whole platform for most changes — the dev containers hot-reload both the frontend and backend automatically as you edit.
 
 ## LM Studio model comparison harness
 
